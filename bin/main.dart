@@ -4,7 +4,7 @@ import 'dart:convert';
 import 'class_creator/json_schema_parser.dart';
 
 Future<void> main() async {
-  var className = 'WebsiteStatus';
+  var className = 'MainClass';
   var schema = await File('./bin/assets/schema.json').readAsStringSync();
 
   var result = JsonSchemaParser().getClasses(
