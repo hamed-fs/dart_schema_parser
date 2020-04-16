@@ -44,9 +44,11 @@ class JsonSchemaParser {
         '''
           /// $className class
           class $className {
+            /// Class constructor
             ${_createContractor(className: className, models: models)}
             /// Creates instance from json
             ${_createFromJsonMethod(className: className, models: models)}
+            ${_createProperties(models: models)}
             /// Converts to json
             ${_createToJsonMethod(models: models)}
             /// Creates copy of instance with given parameters
@@ -62,6 +64,23 @@ class JsonSchemaParser {
     @required String className,
     @required List<SchemaModel> models,
   }) {
+    final StringBuffer result = StringBuffer()
+      ..write(
+        '''
+        $className({
+      ''',
+      );
+
+    for (SchemaModel model in models) {
+      result.write('this.${model.title},');
+    }
+
+    result.write('});');
+
+    return result;
+  }
+
+  static StringBuffer _createProperties({List<SchemaModel> models}) {
     final StringBuffer result = StringBuffer();
 
     for (SchemaModel model in models) {
@@ -72,19 +91,6 @@ class JsonSchemaParser {
         ''',
       );
     }
-
-    result.write(
-      '''
-        /// Class constructor
-        $className({
-      ''',
-    );
-
-    for (SchemaModel model in models) {
-      result.write('this.${model.title},');
-    }
-
-    result.write('});');
 
     return result;
   }
