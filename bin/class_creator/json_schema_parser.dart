@@ -44,8 +44,12 @@ class JsonSchemaParser {
         '''
           class $className {
             ${_createContractor(className: className, models: models)}
+            /// Creates instance from json
             ${_createFromJsonMethod(className: className, models: models)}
+            /// Converts to json
             ${_createToJsonMethod(models: models)}
+            /// Creates copy of instance with given parameters
+            ${_copyWith(className: className, models: models)}
           }
         ''',
       );
@@ -70,7 +74,7 @@ class JsonSchemaParser {
 
     result.write(
       '''
-      
+        /// Class constructor
         $className({
       ''',
     );
@@ -158,6 +162,33 @@ class JsonSchemaParser {
     }
 
     result.write('return data; }');
+
+    return result;
+  }
+
+  static StringBuffer _copyWith({
+    @required String className,
+    @required List<SchemaModel> models,
+  }) {
+    var result = StringBuffer();
+
+    result.write(
+      '''
+        $className copyWith({
+      ''',
+    );
+
+    for (var model in models) {
+      result.write('${model.title},');
+    }
+
+    result.write('}) => $className(');
+
+    for (var model in models) {
+      result.write('${model.title}: ${model.title} ?? this.${model.title},');
+    }
+
+    result.write(');');
 
     return result;
   }
