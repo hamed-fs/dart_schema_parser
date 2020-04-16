@@ -180,7 +180,7 @@ class JsonSchemaParser {
     );
 
     for (var model in models) {
-      result.write('${model.title},');
+      result.write('${model.type} ${model.title},');
     }
 
     result.write('}) => $className(');
