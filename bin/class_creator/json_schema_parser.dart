@@ -81,7 +81,7 @@ class JsonSchemaParser {
     );
 
     for (SchemaModel model in models) {
-      result.write('${model.title},');
+      result.write('this.${model.title},');
     }
 
     result.write('});');
