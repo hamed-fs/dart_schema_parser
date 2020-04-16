@@ -7,6 +7,14 @@ import 'schema_model.dart';
 
 const String _objectType = 'object';
 const String _arrayType = 'array';
+const List<String> _ignoredParameters = <String>[
+  'req_id',
+  'passthrough',
+  'echo_req',
+  'error',
+  'msg_type',
+  'error',
+];
 
 class JsonSchemaParser {
   final List<StringBuffer> _result = <StringBuffer>[];
@@ -120,7 +128,7 @@ class JsonSchemaParser {
           if (json['$schemaTitle'] != null) {
             $title = List<$className>();
             
-            json['$schemaTitle'].forEach((item) =>
+            json['$schemaTitle'].forEach((Map<String, dynamic> item) =>
               $title.add($className.fromJson(item)),
             );
           }
@@ -142,7 +150,8 @@ class JsonSchemaParser {
       ..write(
         '''
           Map<String, dynamic> toJson() {
-            final Map<String, dynamic> data = Map<String, dynamic>();
+            final Map<String, dynamic> result = <String, dynamic>{};
+
         ''',
       );
 
@@ -154,21 +163,21 @@ class JsonSchemaParser {
       if (schemaType == _objectType) {
         result.write('''
           if ($title != null) {
-            data['$schemaTitle'] = $title.toJson();
+            result['$schemaTitle'] = $title.toJson();
           }
         ''');
       } else if (schemaType == _arrayType) {
         result.write('''
           if ($title != null) {
-            data['$schemaTitle'] = $title.map((item) => item.toJson()).toList();
+            result['$schemaTitle'] = $title.map((item) => item.toJson()).toList();
           }
         ''');
       } else {
-        result.write('''data['$schemaTitle'] = $title;''');
+        result.write('''result['$schemaTitle'] = $title;''');
       }
     }
 
-    result.write('return data; }');
+    result.write('\n\nreturn result; }');
 
     return result;
   }
@@ -199,7 +208,9 @@ class JsonSchemaParser {
     return result;
   }
 
-  static List<SchemaModel> getModel({@required Map<String, dynamic> schema}) {
+  static List<SchemaModel> getModel({
+    @required Map<String, dynamic> schema,
+  }) {
     final List<SchemaModel> parentModel = <SchemaModel>[];
     final Map<String, dynamic> schemaProperties = schema['properties'];
 
@@ -208,6 +219,10 @@ class JsonSchemaParser {
         final String name = entry.key;
         final String type = entry.value['type'];
         final String description = entry.value['description'];
+
+        if (_ignoredParameters.contains(name.toLowerCase())) {
+          continue;
+        }
 
         final SchemaModel childModel = SchemaModel()
           ..className = _getClassName(name: name, type: type)
