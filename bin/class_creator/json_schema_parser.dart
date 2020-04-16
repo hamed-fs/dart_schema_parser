@@ -39,7 +39,7 @@ class JsonSchemaParser {
     @required String className,
     @required List<SchemaModel> models,
   }) {
-    var result = StringBuffer()
+    final StringBuffer result = StringBuffer()
       ..write(
         '''
           /// $className class
@@ -62,9 +62,9 @@ class JsonSchemaParser {
     @required String className,
     @required List<SchemaModel> models,
   }) {
-    var result = StringBuffer();
+    final StringBuffer result = StringBuffer();
 
-    for (var model in models) {
+    for (SchemaModel model in models) {
       result.write(
         '''
           /// ${model.description}
@@ -80,7 +80,7 @@ class JsonSchemaParser {
       ''',
     );
 
-    for (var model in models) {
+    for (SchemaModel model in models) {
       result.write('${model.title},');
     }
 
@@ -93,15 +93,15 @@ class JsonSchemaParser {
     @required String className,
     @required List<SchemaModel> models,
   }) {
-    var result = StringBuffer(
+    final StringBuffer result = StringBuffer(
       '$className.fromJson(Map<String, dynamic> json) {',
     );
 
-    for (var model in models) {
-      var className = model.className;
-      var title = model.title;
-      var schemaTitle = model.schemaTitle;
-      var schemaType = model.schemaType;
+    for (SchemaModel model in models) {
+      final String className = model.className;
+      final String title = model.title;
+      final String schemaTitle = model.schemaTitle;
+      final String schemaType = model.schemaType;
 
       if (schemaType == _objectType) {
         result.write('''
@@ -132,7 +132,7 @@ class JsonSchemaParser {
   static StringBuffer _createToJsonMethod({
     @required List<SchemaModel> models,
   }) {
-    var result = StringBuffer()
+    final StringBuffer result = StringBuffer()
       ..write(
         '''
           Map<String, dynamic> toJson() {
@@ -140,10 +140,10 @@ class JsonSchemaParser {
         ''',
       );
 
-    for (var model in models) {
-      var title = model.title;
-      var schemaTitle = model.schemaTitle;
-      var schemaType = model.schemaType;
+    for (SchemaModel model in models) {
+      final String title = model.title;
+      final String schemaTitle = model.schemaTitle;
+      final String schemaType = model.schemaType;
 
       if (schemaType == _objectType) {
         result.write('''
@@ -171,21 +171,20 @@ class JsonSchemaParser {
     @required String className,
     @required List<SchemaModel> models,
   }) {
-    var result = StringBuffer();
-
-    result.write(
-      '''
+    final StringBuffer result = StringBuffer()
+      ..write(
+        '''
         $className copyWith({
       ''',
-    );
+      );
 
-    for (var model in models) {
+    for (SchemaModel model in models) {
       result.write('${model.type} ${model.title},');
     }
 
     result.write('}) => $className(');
 
-    for (var model in models) {
+    for (SchemaModel model in models) {
       result.write('${model.title}: ${model.title} ?? this.${model.title},');
     }
 
@@ -195,8 +194,8 @@ class JsonSchemaParser {
   }
 
   static List<SchemaModel> getModel({@required Map<String, dynamic> schema}) {
-    var parentModel = <SchemaModel>[];
-    var schemaProperties = schema['properties'];
+    final List<SchemaModel> parentModel = <SchemaModel>[];
+    final Map<String, dynamic> schemaProperties = schema['properties'];
 
     if (schemaProperties != null) {
       for (dynamic entry in schemaProperties.entries) {
@@ -204,7 +203,7 @@ class JsonSchemaParser {
         final String type = entry.value['type'];
         final String description = entry.value['description'];
 
-        var childModel = SchemaModel()
+        final SchemaModel childModel = SchemaModel()
           ..className = _getClassName(name: name, type: type)
           ..title = ReCase(name).camelCase
           ..type = _getObjectType(name: name, type: type)
@@ -246,7 +245,7 @@ class JsonSchemaParser {
       );
     }
 
-    for (var model in models) {
+    for (SchemaModel model in models) {
       getClasses(
         className: model.className,
         models: model.children,
