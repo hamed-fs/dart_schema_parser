@@ -42,6 +42,7 @@ class JsonSchemaParser {
     var result = StringBuffer()
       ..write(
         '''
+          /// $className class
           class $className {
             ${_createContractor(className: className, models: models)}
             /// Creates instance from json
