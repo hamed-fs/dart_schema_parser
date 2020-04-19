@@ -1,7 +1,7 @@
 import 'dart:io';
 import 'dart:convert';
 
-import 'class_creator/json_schema_parser.dart';
+import 'json_schema_parser.dart';
 
 Future<void> main() async {
   var className = 'MainClass';
