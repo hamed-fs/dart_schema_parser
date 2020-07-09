@@ -9,7 +9,7 @@ Future<void> main() async {
 
   var result = JsonSchemaParser().getClasses(
     className: className,
-    models: JsonSchemaParser.getModel(
+    models: JsonSchemaParser.getModels(
       schema: json.decode(schema),
     ),
   );

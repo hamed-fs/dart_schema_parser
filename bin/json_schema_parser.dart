@@ -14,8 +14,8 @@ const List<String> _ignoredParameters = <String>[
   'error',
 ];
 
-/// [JsonSchemaParser] is a utility class for extracting main and nested classes from json schema contents.
-/// for using this utility first you should call `getModel()` method and pass decoded json schema to it,
+/// [JsonSchemaParser] is a utility class for extracting main and nested classes from JSON schema contents.
+/// for using this utility first you should call `getModel()` method and pass decoded JSON schema to it,
 /// then pass the result as `models` parameter to `getClasses()` method.
 /// result is a string that contains main class and all related classes of that schema file include:
 /// model classes, constructor, properties,  toJson, fromJson, and copyWith methods.
@@ -76,11 +76,11 @@ class JsonSchemaParser {
           class $className extends ${className}Model {
             /// Initializes
             ${_generateContractor(className: className, models: models)}
-            /// Generate an instance from json
+            /// Creates an instance from JSON
             ${_generateFromJson(className: className, models: models)}
-            /// Converts to json
+            /// Converts an instance to JSON
             ${_generateToJson(models: models)}
-            /// Generate a copy of instance with given parameters
+            /// Creates a copy of instance with given parameters
             ${_copyWith(className: className, models: models)}
           }
         ''',
@@ -102,9 +102,11 @@ class JsonSchemaParser {
       );
 
     for (_SchemaModel model in models) {
-      result.write(
-        isSubclass ? '${model.type} ${model.title},' : 'this.${model.title},',
-      );
+      result
+        ..write('${model.isRequired ? '@required' : ''} ')
+        ..write(
+          isSubclass ? '${model.type} ${model.title},' : 'this.${model.title},',
+        );
     }
 
     if (isSubclass) {
@@ -247,8 +249,8 @@ class JsonSchemaParser {
     return result;
   }
 
-  /// Pass decoded json schema to this method for getting list of objects
-  static List<_SchemaModel> getModel({
+  /// Pass decoded JSON schema to this method for getting list of objects
+  static List<_SchemaModel> getModels({
     @required Map<String, dynamic> schema,
   }) {
     final List<_SchemaModel> parentModel = <_SchemaModel>[];
@@ -282,15 +284,16 @@ class JsonSchemaParser {
               type: isBoolean ? 'boolean' : type,
               arrayType: arrayType,
             )
+            ..isRequired = _isRequired(entry)
             ..description = description.replaceAll('\n', '\n/// ')
             ..schemaTitle = name
             ..schemaType = type
             ..children = <_SchemaModel>[];
 
           if (type == _objectType) {
-            childModel.children.addAll(getModel(schema: entry.value));
+            childModel.children.addAll(getModels(schema: entry.value));
           } else if (type == _arrayType) {
-            childModel.children.addAll(getModel(schema: entry.value['items']));
+            childModel.children.addAll(getModels(schema: entry.value['items']));
           }
 
           parentModel.add(childModel);
@@ -341,6 +344,10 @@ class JsonSchemaParser {
 
   static bool _isBoolean(dynamic entry) =>
       entry.value['type'] == 'integer' && entry.value['enum']?.length == 2;
+
+  static bool _isRequired(dynamic entry) =>
+      entry.value['type']?.length != 2 &&
+      !entry.value['description'].contains('[Optional]');
 }
 
 /// Model to store schema information
@@ -353,6 +360,9 @@ class _SchemaModel {
 
   /// Object type
   String type;
+
+  /// Is required field
+  bool isRequired;
 
   /// Field description
   String description;
